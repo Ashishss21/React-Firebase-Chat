@@ -4,23 +4,17 @@ import "./App.css";
 import { initializeApp } from "firebase/app";
 
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from 'firebase/firestore';
+import { firebaseConfig } from "./firebase.config";
 
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD0Dx7aylGMpinYb5C4_c1BbTPRKVvE_9Q",
-  authDomain: "instant-app-5764d.firebaseapp.com",
-  projectId: "instant-app-5764d",
-  storageBucket: "instant-app-5764d.appspot.com",
-  messagingSenderId: "670070203650",
-  appId: "1:670070203650:web:1998c107c0e4eaf1c0ce1b",
-};
-
 const firebaseApp = initializeApp({ firebaseConfig });
 
+const firestore = getFirestore(firebaseApp);
 const auth = getAuth();
-const firestore = firebase.firestore();
+
 
 function App() {
   const [user] = useAuthState(auth);
@@ -28,7 +22,7 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1>⚛️🔥💬</h1>
+        <h1><span role="img" aria-label="img">⚛️🔥💬</span></h1>
         <SignOut />
       </header>
 
@@ -42,28 +36,13 @@ function App() {
 
 function SignIn() {
 
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-      // The signed-in user info.
-      const user = result.user;
-      // ...
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      // The email of the user's account used.
-      const email = error.email;
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      // ...
-    });
+  const signInWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(provider);
+  }
   return (
     <>
-      <button className="sign-in" onClick={signInWithPopup}>
+      <button className="sign-in" onClick={signInWithGoogle}>
         Sign in with Google
       </button>
     </>
@@ -96,7 +75,7 @@ function ChatRoom() {
 
     await messagesRef.add({
       text: formValue,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: firestore.FieldValue.serverTimestamp(),
       uid,
       photoURL,
     });
@@ -122,7 +101,7 @@ function ChatRoom() {
         />
 
         <button type="submit" disabled={!formValue}>
-          🕊️
+          Send
         </button>
       </form>
     </>
@@ -138,6 +117,7 @@ function ChatMessage(props) {
     <>
       <div className={`message ${messageClass}`}>
         <img
+          alt="PhotoURL"
           src={
             photoURL || "https://api.adorable.io/avatars/23/abott@adorable.png"
           }
